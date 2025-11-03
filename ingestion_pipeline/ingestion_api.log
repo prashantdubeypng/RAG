@@ -1,0 +1,24 @@
+2025-11-03 22:00:13 - __main__ - INFO - [app.py:74] - Initializing ingestion pipeline...
+2025-11-03 22:00:13 - __main__ - INFO - [app.py:75] - DB Path: chroma_local_db
+2025-11-03 22:00:13 - __main__ - INFO - [app.py:76] - Text Model: BAAI/bge-base-en
+2025-11-03 22:00:13 - __main__ - INFO - [app.py:77] - Image Model: google/siglip-base-patch16-224
+2025-11-03 22:00:13 - __main__ - INFO - [app.py:81] - Offline mode: True
+2025-11-03 22:00:50 - __main__ - INFO - [app.py:89] - ✓ Pipeline initialized successfully
+2025-11-03 22:04:32 - __main__ - INFO - [app.py:74] - Initializing ingestion pipeline...
+2025-11-03 22:04:32 - __main__ - INFO - [app.py:75] - DB Path: chroma_local_db
+2025-11-03 22:04:32 - __main__ - INFO - [app.py:76] - Text Model: BAAI/bge-base-en
+2025-11-03 22:04:32 - __main__ - INFO - [app.py:77] - Image Model: google/siglip-base-patch16-224
+2025-11-03 22:04:32 - __main__ - INFO - [app.py:81] - Offline mode: True
+2025-11-03 22:04:42 - __main__ - INFO - [app.py:89] - ✓ Pipeline initialized successfully
+2025-11-03 22:09:11 - __main__ - INFO - [app.py:74] - Initializing ingestion pipeline...
+2025-11-03 22:09:11 - __main__ - INFO - [app.py:75] - DB Path: chroma_local_db
+2025-11-03 22:09:11 - __main__ - INFO - [app.py:76] - Text Model: BAAI/bge-base-en
+2025-11-03 22:09:11 - __main__ - INFO - [app.py:77] - Image Model: google/siglip-base-patch16-224
+2025-11-03 22:09:11 - __main__ - INFO - [app.py:81] - Offline mode: True
+2025-11-03 22:09:21 - __main__ - INFO - [app.py:89] - ✓ Pipeline initialized successfully
+2025-11-03 22:12:01 - __main__ - INFO - [app.py:74] - Initializing ingestion pipeline...
+2025-11-03 22:12:01 - __main__ - INFO - [app.py:75] - DB Path: chroma_local_db
+2025-11-03 22:12:01 - __main__ - INFO - [app.py:76] - Text Model: BAAI/bge-base-en
+2025-11-03 22:12:01 - __main__ - INFO - [app.py:77] - Image Model: google/siglip-base-patch16-224
+2025-11-03 22:12:01 - __main__ - INFO - [app.py:81] - Offline mode: True
+2025-11-03 22:12:10 - __main__ - INFO - [app.py:89] - ✓ Pipeline initialized successfully
