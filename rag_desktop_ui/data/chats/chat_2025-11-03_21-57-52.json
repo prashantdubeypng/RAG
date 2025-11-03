@@ -1,0 +1,10 @@
+[
+  {
+    "role": "You",
+    "content": "tell me about the data"
+  },
+  {
+    "role": "AI",
+    "content": "AI response for: tell me about the data"
+  }
+]

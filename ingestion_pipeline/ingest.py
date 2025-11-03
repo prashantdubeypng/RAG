@@ -71,35 +71,40 @@ class IngestionPipeline:
                     os.environ['HF_HUB_OFFLINE'] = original_hf_offline
         
         # Load image embedding model (SigLIP)
-        logger.info(f"Loading image embedding model: {image_model}")
-        if offline_mode:
-            original_hf_offline = os.environ.get('HF_HUB_OFFLINE', None)
-            os.environ['HF_HUB_OFFLINE'] = '1'
+        if image_model is None:
+            logger.info("Image embedding model disabled (image_model=None)")
+            self.image_model = None
+            self.image_processor = None
         else:
-            logger.info("  (Online mode: will download if not in cache)")
-        
-        try:
-            self.image_model = AutoModel.from_pretrained(image_model)
-            self.image_processor = AutoProcessor.from_pretrained(image_model)
-            self.image_model.eval()  # Set to evaluation mode
-            logger.info("✓ Image embedding model (SigLIP) loaded successfully")
-        except Exception as e:
-            logger.error(f"Failed to load image embedding model: {str(e)}")
-            error_msg = str(e).lower()
-            if offline_mode and ('not found' in error_msg or 'does not exist' in error_msg or 'offline' in error_msg):
-                raise RuntimeError(
-                    f"Image model '{image_model}' not found in local cache.\n"
-                    f"Please download it first (while online) using:\n"
-                    f"  python ingestion_pipeline/setup_offline.py\n"
-                ) from e
-            else:
-                raise
-        finally:
+            logger.info(f"Loading image embedding model: {image_model}")
             if offline_mode:
-                if original_hf_offline is None:
-                    os.environ.pop('HF_HUB_OFFLINE', None)
+                original_hf_offline = os.environ.get('HF_HUB_OFFLINE', None)
+                os.environ['HF_HUB_OFFLINE'] = '1'
+            else:
+                logger.info("  (Online mode: will download if not in cache)")
+            
+            try:
+                self.image_model = AutoModel.from_pretrained(image_model)
+                self.image_processor = AutoProcessor.from_pretrained(image_model)
+                self.image_model.eval()  # Set to evaluation mode
+                logger.info("✓ Image embedding model (SigLIP) loaded successfully")
+            except Exception as e:
+                logger.error(f"Failed to load image embedding model: {str(e)}")
+                error_msg = str(e).lower()
+                if offline_mode and ('not found' in error_msg or 'does not exist' in error_msg or 'offline' in error_msg):
+                    raise RuntimeError(
+                        f"Image model '{image_model}' not found in local cache.\n"
+                        f"Please download it first (while online) using:\n"
+                        f"  python ingestion_pipeline/setup_offline.py\n"
+                    ) from e
                 else:
-                    os.environ['HF_HUB_OFFLINE'] = original_hf_offline
+                    raise
+            finally:
+                if offline_mode:
+                    if original_hf_offline is None:
+                        os.environ.pop('HF_HUB_OFFLINE', None)
+                    else:
+                        os.environ['HF_HUB_OFFLINE'] = original_hf_offline
         
         # Get max sequence length for text model
         try:

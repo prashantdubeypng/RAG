@@ -5,7 +5,7 @@ import fitz  # PyMuPDF
 from docx import Document
 from PIL import Image
 import whisper
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pathlib import Path
 from typing import List, Tuple, Dict, Any
 import re

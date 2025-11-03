@@ -1,64 +1,86 @@
 # ui/sidebar.py
 import os
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QPushButton, QLabel
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget, QHBoxLayout
+from PyQt5.QtCore import Qt, pyqtSignal
+import qtawesome as qta
 
 
 class Sidebar(QWidget):
+    upload_clicked = pyqtSignal()
+    newchat_clicked = pyqtSignal()
+    theme_toggled = pyqtSignal(bool)  # emits True for dark, False for light
     chat_selected = pyqtSignal(str)
-    new_chat_clicked = pyqtSignal()
 
-    def __init__(self, chat_dir="./data/chats"):
-        super().__init__()
+    def __init__(self, chat_dir="./data/chats", parent=None):
+        super().__init__(parent)
         self.chat_dir = chat_dir
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #202020;
-                color: white;
-                font-family: 'Segoe UI';
-            }
-            QListWidget {
-                background-color: #2C2C2C;
-                border: none;
-                border-radius: 8px;
-                padding: 5px;
-            }
-            QPushButton {
-                background-color: #0E639C;
-                border-radius: 6px;
-                padding: 6px;
-                font-weight: bold;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #1177BB;
-            }
-            QLabel {
-                color: #AAAAAA;
-                padding: 4px;
-                font-size: 14px;
-            }
-        """)
+        self.setObjectName("sidebar")
+        self.init_ui()
 
+    def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(10)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(12)
 
-        self.title = QLabel("💬 Chat Sessions")
-        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.new_chat_btn = QPushButton("+ New Chat")
-        self.new_chat_btn.clicked.connect(self.new_chat_clicked.emit)
+        # Top logo + title
+        logo_label = QLabel("YOURDATA")
+        logo_label.setStyleSheet("font-weight:700; font-size:18px;")
+        subtitle = QLabel("Intelligent AI Assistant")
+        subtitle.setStyleSheet("color: rgba(255,255,255,0.6); font-size:11px;")
 
+        layout.addWidget(logo_label)
+        layout.addWidget(subtitle)
+
+        # Upload button (above New Chat)
+        upload_btn = QPushButton("Upload Data")
+        upload_btn.setObjectName("primary")
+        upload_btn.setIcon(qta.icon('fa.upload', color='white'))
+        upload_btn.clicked.connect(lambda: self.upload_clicked.emit())
+        upload_btn.setFixedHeight(44)
+        layout.addWidget(upload_btn)
+
+        # New Chat button
+        newchat_btn = QPushButton("+ New Chat")
+        newchat_btn.setObjectName("ghost")
+        newchat_btn.setIcon(qta.icon('fa.plus', color='#E6EEF8'))
+        newchat_btn.clicked.connect(lambda: self.newchat_clicked.emit())
+        newchat_btn.setFixedHeight(42)
+        layout.addWidget(newchat_btn)
+
+        # Recent chats list
+        lbl = QLabel("Recent Chats")
+        lbl.setStyleSheet("margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.7);")
+        layout.addWidget(lbl)
+        
         self.chat_list = QListWidget()
+        self.chat_list.setFixedHeight(220)
         self.chat_list.itemClicked.connect(self.on_chat_selected)
-
-        layout.addWidget(self.title)
-        layout.addWidget(self.new_chat_btn)
         layout.addWidget(self.chat_list)
-        layout.addStretch()
-        self.setLayout(layout)
 
+        # spacer
+        layout.addStretch()
+
+        # Theme toggle area
+        theme_layout = QHBoxLayout()
+        self.theme_btn = QPushButton("🌙 Dark Mode")
+        self.theme_btn.setObjectName("ghost")
+        self.theme_btn.setCheckable(True)
+        self.theme_btn.setChecked(True)  # Default to dark
+        self.theme_btn.toggled.connect(self.on_theme_toggled)
+        theme_layout.addWidget(self.theme_btn)
+        layout.addLayout(theme_layout)
+
+        self.setLayout(layout)
         self.refresh_chats()
+
+    def on_theme_toggled(self, checked):
+        # Update button text
+        if checked:
+            self.theme_btn.setText("🌙 Dark Mode")
+        else:
+            self.theme_btn.setText("☀️ Light Mode")
+        # emit True for dark, False for light
+        self.theme_toggled.emit(checked)
 
     def refresh_chats(self):
         """Reload chat files into sidebar list."""
@@ -67,8 +89,17 @@ class Sidebar(QWidget):
         files = sorted(os.listdir(self.chat_dir))
         for f in files:
             if f.endswith(".json"):
-                self.chat_list.addItem(f)
+                # Clean up filename for display
+                display_name = f.replace("chat_", "").replace(".json", "").replace("_", " ")
+                self.chat_list.addItem(display_name)
 
     def on_chat_selected(self, item):
-        file_path = os.path.join(self.chat_dir, item.text())
-        self.chat_selected.emit(file_path)
+        # Convert display name back to filename
+        display_text = item.text()
+        # Find the actual file that matches
+        files = os.listdir(self.chat_dir)
+        for f in files:
+            if f.endswith(".json") and display_text.replace(" ", "_") in f:
+                file_path = os.path.join(self.chat_dir, f)
+                self.chat_selected.emit(file_path)
+                break

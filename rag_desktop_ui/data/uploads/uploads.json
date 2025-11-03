@@ -1,0 +1,19 @@
+[
+  {
+    "path": "./data/uploads\\1762181551.412254_Prashant.pdf",
+    "name": "Prashant.pdf",
+    "type": "application/pdf"
+  },
+  {
+    "path": "data\\uploads\\1762192331274_download.pdf",
+    "name": "download.pdf",
+    "type": "application/pdf",
+    "processed": true
+  },
+  {
+    "path": "data\\uploads\\1762192248983_jyoti_dubey_internship_certificate.pdf",
+    "name": "jyoti_dubey_internship_certificate.pdf",
+    "type": "application/pdf",
+    "processed": true
+  }
+]
