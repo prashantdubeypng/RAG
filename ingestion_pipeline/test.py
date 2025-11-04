@@ -1,30 +1,15 @@
-import chromadb
-from chromadb.utils import embedding_functions
+from client import IngestionClient
 
-# Use local persistent storage (offline)
-client = chromadb.PersistentClient(path="./chroma_db")
+# Initialize
+client = IngestionClient()
 
-# Optional: define an embedding model
-embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+# Upload a file
+# result = client.upload_file("C:\\Users\\omvis\\Downloads\\Gmail - Poster Session for UPLINK Interns at ACM IKDD CODS’25 Conference.pdf")
+# print(result["chunks_processed"])
 
-# Create or get a collection
-collection = client.get_or_create_collection(
-    name="research_papers",
-    embedding_function=embedding_function
-)
+# # Search
+results = client.search("what was the email from IKDD office to Om Vishesh", n_results=3)
+print(results)
 
-# Add sample data
-documents = [
-    "Milvus Lite runs embedded without external server.",
-    "ChromaDB supports offline persistent vector storage.",
-    "Qdrant and Weaviate are great for hybrid vector search."
-]
-ids = ["1", "2", "3"]
-# collection.add(documents=documents, ids=ids)
-
-# Perform a similarity search
-results = collection.query(
-    query_texts=["offline vector database"],
-    n_results=2
-)
-print(f"Results: {results}")
+# Ingest directory
+# result = client.ingest_directory("/path/to/documents")

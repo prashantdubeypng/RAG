@@ -23,7 +23,7 @@ class PDFParser:
         # Reduced chunk size to ensure it fits within CLIP's 77 token limit
         # ~4 chars per token, so 250 chars should be safe for 77 tokens
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=250,
+            chunk_size=1000,
             chunk_overlap=50,
             length_function=len,
         )
