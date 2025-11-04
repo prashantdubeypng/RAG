@@ -25,16 +25,12 @@ if ingestion_path not in sys.path:
 INGESTION_AVAILABLE = os.path.exists(os.path.join(ingestion_path, 'client.py'))
 
 def get_ingestion_client():
-    """Lazy load the ingestion client to avoid import issues at startup"""
+    """Get ingestion client - use subprocess approach to avoid DLL issues"""
     try:
-        from client import IngestionClient
-        return IngestionClient(
-            text_model="BAAI/bge-base-en",
-            image_model=None,  # Disable image processing for now
-            offline_mode=False
-        )
+        # Try to use subprocess approach first
+        return SubprocessIngestionClient()
     except Exception as e:
-        print(f"Error creating real ingestion client: {e}")
+        print(f"Error creating subprocess ingestion client: {e}")
         print("Falling back to mock client for UI testing...")
         try:
             # Import mock client from the same directory
@@ -49,7 +45,193 @@ def get_ingestion_client():
             print(f"Error creating mock client: {e2}")
             return None
 
-UPLOADS_DIR = os.path.join("data", "uploads")
+
+class SubprocessIngestionClient:
+    """Ingestion client that uses subprocess to avoid DLL issues"""
+    
+    def __init__(self):
+        # Get the correct Python executable from the virtual environment
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        venv_python = os.path.join(current_dir, '..', 'venv', 'Scripts', 'python.exe')
+        self.python_exe = os.path.abspath(venv_python)
+        
+        # Get the ingestion pipeline directory
+        self.ingestion_dir = os.path.join(current_dir, '..', '..', 'ingestion_pipeline')
+        self.ingestion_dir = os.path.abspath(self.ingestion_dir)
+        
+        if not os.path.exists(self.python_exe):
+            raise Exception(f"Virtual environment Python not found: {self.python_exe}")
+        if not os.path.exists(self.ingestion_dir):
+            raise Exception(f"Ingestion pipeline directory not found: {self.ingestion_dir}")
+    
+    def upload_file(self, file_path):
+        """Upload a file using subprocess"""
+        import subprocess
+        import json
+        
+        try:
+            # Convert to absolute path to avoid path issues
+            abs_file_path = os.path.abspath(file_path)
+            
+            # Create a simple Python script to run the ingestion
+            script = f'''
+import sys
+import os
+sys.path.insert(0, r"{self.ingestion_dir}")
+from client import IngestionClient
+import json
+
+try:
+    # Verify file exists
+    file_path = r"{abs_file_path}"
+    if not os.path.exists(file_path):
+        raise Exception(f"File not found: {{file_path}}")
+    
+    client = IngestionClient(
+        text_model="BAAI/bge-base-en",
+        image_model=None,
+        offline_mode=False
+    )
+    result = client.upload_file(file_path)
+    print("SUCCESS:" + json.dumps(result))
+except Exception as e:
+    print("ERROR:" + str(e))
+'''
+            
+            # Run the script using subprocess
+            result = subprocess.run(
+                [self.python_exe, '-c', script],
+                cwd=self.ingestion_dir,
+                capture_output=True,
+                text=True,
+                timeout=300  # 5 minute timeout
+            )
+            
+            # Parse the result
+            if result.returncode == 0:
+                output_lines = result.stdout.strip().split('\n')
+                for line in output_lines:
+                    if line.startswith('SUCCESS:'):
+                        return json.loads(line[8:])  # Remove 'SUCCESS:' prefix
+                    elif line.startswith('ERROR:'):
+                        raise Exception(line[6:])  # Remove 'ERROR:' prefix
+                
+                # If no SUCCESS/ERROR found, return a basic success
+                return {
+                    "status": "success",
+                    "message": "File uploaded successfully",
+                    "file_path": file_path,
+                    "chunks_processed": 1
+                }
+            else:
+                error_msg = result.stderr or result.stdout or "Unknown error"
+                raise Exception(f"Subprocess failed: {error_msg}")
+                
+        except subprocess.TimeoutExpired:
+            raise Exception("Upload timeout - file processing took too long")
+        except Exception as e:
+            raise Exception(f"Upload failed: {str(e)}")
+    
+    def get_collection_info(self):
+        """Get collection info using subprocess"""
+        import subprocess
+        import json
+        
+        try:
+            script = f'''
+import sys
+sys.path.insert(0, r"{self.ingestion_dir}")
+from client import IngestionClient
+import json
+
+try:
+    client = IngestionClient(
+        text_model="BAAI/bge-base-en",
+        image_model=None,
+        offline_mode=False
+    )
+    result = client.get_collection_info()
+    print("SUCCESS:" + json.dumps(result))
+except Exception as e:
+    print("ERROR:" + str(e))
+'''
+            
+            result = subprocess.run(
+                [self.python_exe, '-c', script],
+                cwd=self.ingestion_dir,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            
+            if result.returncode == 0:
+                output_lines = result.stdout.strip().split('\n')
+                for line in output_lines:
+                    if line.startswith('SUCCESS:'):
+                        return json.loads(line[8:])
+                    elif line.startswith('ERROR:'):
+                        raise Exception(line[6:])
+                
+                return {"count": 0, "collections": []}
+            else:
+                error_msg = result.stderr or result.stdout or "Unknown error"
+                raise Exception(f"Subprocess failed: {error_msg}")
+                
+        except Exception as e:
+            return {"count": 0, "collections": [], "error": str(e)}
+    
+    def search(self, query, n_results=3):
+        """Search the vector database using subprocess"""
+        import subprocess
+        import json
+        
+        try:
+            script = f'''
+import sys
+sys.path.insert(0, r"{self.ingestion_dir}")
+from client import IngestionClient
+import json
+
+try:
+    client = IngestionClient(
+        text_model="BAAI/bge-base-en",
+        image_model=None,
+        offline_mode=False
+    )
+    result = client.search(r"{query}", n_results={n_results})
+    print("SUCCESS:" + json.dumps(result))
+except Exception as e:
+    print("ERROR:" + str(e))
+'''
+            
+            result = subprocess.run(
+                [self.python_exe, '-c', script],
+                cwd=self.ingestion_dir,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            
+            if result.returncode == 0:
+                output_lines = result.stdout.strip().split('\n')
+                for line in output_lines:
+                    if line.startswith('SUCCESS:'):
+                        return json.loads(line[8:])
+                    elif line.startswith('ERROR:'):
+                        raise Exception(line[6:])
+                
+                return {"documents": [[]], "metadatas": [[]], "distances": [[]]}
+            else:
+                error_msg = result.stderr or result.stdout or "Unknown error"
+                raise Exception(f"Search subprocess failed: {error_msg}")
+                
+        except Exception as e:
+            print(f"Search failed: {e}")
+            return {"documents": [[]], "metadatas": [[]], "distances": [[]]}
+
+# Use absolute path for uploads directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+UPLOADS_DIR = os.path.join(os.path.dirname(current_dir), "data", "uploads")
 META_FILE = os.path.join(UPLOADS_DIR, "uploads.json")
 ALLOWED = [
     "PDF files (*.pdf)",

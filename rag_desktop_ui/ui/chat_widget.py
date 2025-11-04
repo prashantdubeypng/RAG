@@ -27,16 +27,13 @@ if ingestion_path not in sys.path:
 INGESTION_AVAILABLE = os.path.exists(os.path.join(ingestion_path, 'client.py'))
 
 def get_ingestion_client():
-    """Lazy load the ingestion client to avoid import issues at startup"""
+    """Get ingestion client - use subprocess approach to avoid DLL issues"""
     try:
-        from client import IngestionClient
-        return IngestionClient(
-            text_model="BAAI/bge-base-en",
-            image_model=None,  # Disable image processing for now
-            offline_mode=False
-        )
+        # Import the subprocess client from upload_dialog
+        from .upload_dialog import SubprocessIngestionClient
+        return SubprocessIngestionClient()
     except Exception as e:
-        print(f"Error creating real ingestion client: {e}")
+        print(f"Error creating subprocess ingestion client: {e}")
         print("Falling back to mock client for UI testing...")
         try:
             # Import mock client from the same directory
@@ -426,6 +423,15 @@ class ChatWidget(QWidget):
             return
             
         files_display = "\n".join([f"• {os.path.basename(p)}" for p in file_paths])
+        
+        # Try to initialize ingestion client if not already done
+        if self.ingestion_client is None and INGESTION_AVAILABLE:
+            try:
+                self.ingestion_client = get_ingestion_client()
+                if self.ingestion_client:
+                    print("✓ RAG functionality enabled for file display")
+            except Exception as e:
+                print(f"Failed to initialize ingestion client: {e}")
         
         if self.ingestion_client:
             try:

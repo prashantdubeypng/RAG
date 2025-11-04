@@ -2,5 +2,29 @@
   {
     "role": "AI",
     "content": "AI response for: hello"
+  },
+  {
+    "role": "You",
+    "content": "so i want to know about the software engineer jobs"
+  },
+  {
+    "role": "AI",
+    "content": "Based on your uploaded documents, here's what I found:\n\nThis is a mock search result for 'so i want to know about the software engineer jobs'. In a real implementation, this would be relevant content from your uploaded documents.\n\nAnother mock result showing how the system would find information related to 'so i want to know about the software engineer jobs' in your knowledge base.\n\nThis information is relevant to your query: 'so i want to know about the software engineer jobs'"
+  },
+  {
+    "role": "You",
+    "content": "tell me about machine learning engineer"
+  },
+  {
+    "role": "AI",
+    "content": "Based on your uploaded documents, here's what I found:\n\nThis is a mock search result for 'tell me about machine learning engineer'. In a real implementation, this would be relevant content from your uploaded documents.\n\nAnother mock result showing how the system would find information related to 'tell me about machine learning engineer' in your knowledge base.\n\nThis information is relevant to your query: 'tell me about machine learning engineer'"
+  },
+  {
+    "role": "You",
+    "content": "dont we can make a agent using n8n"
+  },
+  {
+    "role": "AI",
+    "content": "Based on your uploaded documents, here's what I found:\n\nThis is a mock search result for 'dont we can make a agent using n8n'. In a real implementation, this would be relevant content from your uploaded documents.\n\nAnother mock result showing how the system would find information related to 'dont we can make a agent using n8n' in your knowledge base.\n\nThis information is relevant to your query: 'dont we can make a agent using n8n'"
   }
 ]

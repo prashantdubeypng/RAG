@@ -8,5 +8,5 @@ client = IngestionClient()
 # print(result["chunks_processed"])
 
 # Search
-results = client.search("jyoti dubey", n_results=3)
+results = client.search("up Scholarship", n_results=5)
 print(results)

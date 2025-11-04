@@ -89,6 +89,11 @@ QFrame {
     font-weight: 700;
     color: #9AA6B2;
 }
+
+#topBar {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
 """
 
 DARK = """
@@ -180,5 +185,10 @@ QFrame {
     font-size: 48px;
     font-weight: 700;
     color: rgba(255,255,255,0.95);
+}
+
+#topBar {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 """
